@@ -24,15 +24,15 @@
 #define P2KING 28
 
 struct chess{
-	int p1castle1;
+	int p1castle1; //can player still castle to this side or not
 	int p1castle2;
 	int p2castle1;
 	int p2castle2;
-	int p1kingx;
+	int p1kingx; //Location of player's king
 	int p1kingy;
 	int p2kingx;
 	int p2kingy;
-	int p1enpassant;
+	int p1enpassant; //Which pawn can currently by en passant'd
 	int p2enpassant;
 	int chessboard[8][8];
 };
@@ -353,6 +353,7 @@ int kingatrisk(struct chess *chess_state, int beforex, int beforey, int afterx, 
 	return 0;
 }
 
+//Allocate and return new board/state after taking the given move
 struct chess *getboard(struct chess *chess_state, int buttonx, int buttony, int chosenx, int choseny, int turn){
 	struct chess *newboard = (struct chess *) calloc(1, sizeof(struct chess));
 	memcpy(newboard, chess_state, sizeof(struct chess));
@@ -429,7 +430,7 @@ struct chess *getboard(struct chess *chess_state, int buttonx, int buttony, int 
 	return newboard;
 }
 
-//Determine all potential moves with given piece and display them
+//Determine all potential moves with given piece and return with them
 int getmoves(struct chess *chess_state, int i, int j, int pturn, int moves, struct chess ***chess_total_moves){
 	struct chess *chess_moves[22];// = (struct chess **) calloc(22, sizeof(struct chess *));
 	int moves_len = 0;
@@ -910,8 +911,7 @@ int checkmate(struct chess *chess_state, int pturn){
 	return pturn+1;
 }
 
-void **moves(void *gamestate, int turn, int *movecount, int *movesize, int gametype){
-	*movesize = sizeof(struct chess *);
+void **moves(void *gamestate, int turn, int *movecount, int gametype){
 	struct chess *chess_state = (struct chess *) gamestate;
 	struct chess **moves = (struct chess **) calloc(1, sizeof(struct chess *));
 	for(int i = 0; i < 8; i++){
