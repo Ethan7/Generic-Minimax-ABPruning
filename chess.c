@@ -37,23 +37,23 @@ struct chess{
 	int chessboard[8][8];
 };
 
-void *allocmove(int gametype){
+void *allocmove(){
 	struct chess *chessboard = (struct chess *) calloc(1, sizeof(struct chess));
 	return (void *) chessboard;
 }
 
-void freemove(void *gamestate, int gametype){
+void freemove(void *gamestate){
 	struct chess *chessboard = (struct chess *) gamestate;
 	free(chessboard);
 }
 
-void copymove(void *action, void *gamestate, int gametype){
+void copymove(void *action, void *gamestate){
 	struct chess *copyboard = (struct chess *) action;
 	struct chess *chessboard = (struct chess *) gamestate;
 	memcpy(copyboard, chessboard, sizeof(struct chess));
 }
 
-void printmove(void *gamestate, int gametype){
+void printmove(void *gamestate){
 	struct chess *chess_state = (struct chess *) gamestate;
 	for(int i = 0; i < 8; i++){
 		for(int j = 0; j < 8; j++){
@@ -911,7 +911,7 @@ int checkmate(struct chess *chess_state, int pturn){
 	return pturn+1;
 }
 
-void **moves(void *gamestate, int turn, int *movecount, int gametype){
+void **moves(void *gamestate, int turn, int *movecount){
 	struct chess *chess_state = (struct chess *) gamestate;
 	struct chess **moves = (struct chess **) calloc(1, sizeof(struct chess *));
 	for(int i = 0; i < 8; i++){
@@ -924,7 +924,8 @@ void **moves(void *gamestate, int turn, int *movecount, int gametype){
 	return (void **) moves;
 }
 
-void static_eval(void *gamestate, int *eval, int *terminal, int turn, int gametype){
+//Temporary static eval function, needs to be improved
+void static_eval(void *gamestate, int *eval, int *terminal, int turn){
 	struct chess *chess_state = (struct chess *) gamestate;
 	if(turn % 2 == 0 && checkmate(chess_state, 1)){
 		*terminal = 1;
@@ -987,29 +988,26 @@ void static_eval(void *gamestate, int *eval, int *terminal, int turn, int gamety
 	}*/
 }
 
-void *openmove(char *filename, int gametype){
+void *openmove(char *filename){
 	struct chess *chess_state = (struct chess *) calloc(1, sizeof(struct chess));
 	FILE *movefile = fopen(filename, "r");
-	char linefeed[16];
-	for(int i = 0; i < 8; i++){
-		fgets(linefeed, 16, movefile);
-		for(int j = 0; j < 8; j++){
-			switch(linefeed[j*2]){
-				case 1: //TODO: FIX THIS
-				//TODO: FIX THIS BY CHANGING THE NUMBER DEFINES TO ALPHANUMERICS char values
-				//starting with EMPTY as '0' and P1PAWN as 'a' and P1KNIGHT as 'b' and so on.
-				//This way the math will work out.
-					chess_state->chessboard[i][j] = P1PAWN;
-					break;
-			}
-		}
-		//TODO: add lines to fgets the other properties of the chess board state
-	}
+
+	fread(chess_state, sizeof(struct chess), 1, movefile);
+
 	fclose(movefile);
 	return (void *)chess_state;
 }
 
-void *startstate(int gametype){
+void savemove(char *filename, void *gamestate){
+	struct chess *chess_state = (struct chess *) gamestate;
+	FILE *savefile = fopen(filename, "w");
+	
+	fwrite(chess_state, sizeof(struct chess), 1, savefile);
+
+	fclose(savefile);
+}
+
+void *startstate(){
 	struct chess *chess_state = (struct chess *) calloc(1, sizeof(struct chess));
 	for(int i = 0; i < 8; i++){
 		for(int j = 2; j < 6; j++){
